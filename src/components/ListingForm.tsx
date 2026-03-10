@@ -9,42 +9,22 @@ export default function ListingForm() {
   const [productName, setProductName] = useState('');
   const [condition, setCondition] = useState<Condition>('Good');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [suggestion, setSuggestion] = useState<ListingSuggestion | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
-
-  const SUGGESTIONS = [
-    "Rab Microlight Alpine Jacket",
-    "Patagonia Torrentshell 3L Jacket",
-    "The North Face Nuptse 1996 Jacket",
-    "Arc'teryx Beta LT Jacket",
-    "Osprey Talon 22 Backpack",
-    "Osprey Exos 48 Backpack",
-    "Berghaus Hillwalker II GTX Boots",
-    "Montane Terra Pants",
-    "Montane Prism Jacket",
-    "Scarpa Mojito Shoes",
-    "Salomon Speedcross 6",
-    "Petzl Tikka Headlamp",
-    "Black Diamond Spot 400",
-    "MSR PocketRocket 2 Stove",
-    "Therm-a-Rest NeoAir XLite",
-    "Sea to Summit Ether Light XT",
-    "Mountain Equipment Lightline Jacket",
-    "Jack Wolfskin Helium Jacket",
-    "Fjällräven Kånken Backpack",
-    "Gregory Baltoro 65"
-  ];
 
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!productName.trim()) return;
 
     setLoading(true);
+    setError(null);
     try {
       const result = await generateListing(productName, condition);
       setSuggestion(result);
-    } catch (error) {
-      console.error('Error generating listing:', error);
+    } catch (err) {
+      console.error('Error generating listing:', err);
+      setError(err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -106,13 +86,7 @@ export default function ListingForm() {
               placeholder="e.g. Rab Microlight Alpine Women's Jacket Size 12 Blue"
               className="w-full px-4 py-4 rounded-xl border border-stone-200 focus:ring-2 focus:ring-brand-green focus:border-brand-green outline-none transition-all text-stone-800 placeholder:text-stone-300"
               required
-              list="product-suggestions"
             />
-            <datalist id="product-suggestions">
-              {SUGGESTIONS.map((item) => (
-                <option key={item} value={item} />
-              ))}
-            </datalist>
           </div>
 
           <div className="space-y-3">
@@ -141,6 +115,7 @@ export default function ListingForm() {
               onClick={() => {
                 setProductName('');
                 setSuggestion(null);
+                setError(null);
               }}
               className="px-8 py-4 bg-stone-100 text-stone-600 rounded-2xl font-semibold hover:bg-stone-200 transition-all active:scale-[0.98]"
             >
@@ -164,6 +139,26 @@ export default function ListingForm() {
         </form>
 
         <AnimatePresence mode="wait">
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="bg-red-50 border border-red-100 rounded-2xl p-4 flex items-start gap-3 text-red-800"
+            >
+              <Info className="shrink-0 mt-0.5" size={18} />
+              <div className="space-y-1">
+                <p className="text-sm font-bold">Generation Failed</p>
+                <p className="text-xs leading-relaxed opacity-90">{error}</p>
+                {(error.includes('API Key') || error.includes('GEMINI_API_KEY')) && (
+                  <p className="text-[10px] mt-2 font-medium bg-red-100/50 px-2 py-1 rounded inline-block">
+                    Tip: Ensure GEMINI_API_KEY is set in your Vercel Environment Variables.
+                  </p>
+                )}
+              </div>
+            </motion.div>
+          )}
+
           {suggestion && (
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
