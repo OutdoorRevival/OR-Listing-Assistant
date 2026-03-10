@@ -12,6 +12,29 @@ export default function ListingForm() {
   const [suggestion, setSuggestion] = useState<ListingSuggestion | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
 
+  const SUGGESTIONS = [
+    "Rab Microlight Alpine Jacket",
+    "Patagonia Torrentshell 3L Jacket",
+    "The North Face Nuptse 1996 Jacket",
+    "Arc'teryx Beta LT Jacket",
+    "Osprey Talon 22 Backpack",
+    "Osprey Exos 48 Backpack",
+    "Berghaus Hillwalker II GTX Boots",
+    "Montane Terra Pants",
+    "Montane Prism Jacket",
+    "Scarpa Mojito Shoes",
+    "Salomon Speedcross 6",
+    "Petzl Tikka Headlamp",
+    "Black Diamond Spot 400",
+    "MSR PocketRocket 2 Stove",
+    "Therm-a-Rest NeoAir XLite",
+    "Sea to Summit Ether Light XT",
+    "Mountain Equipment Lightline Jacket",
+    "Jack Wolfskin Helium Jacket",
+    "Fjällräven Kånken Backpack",
+    "Gregory Baltoro 65"
+  ];
+
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!productName.trim()) return;
@@ -83,7 +106,13 @@ export default function ListingForm() {
               placeholder="e.g. Rab Microlight Alpine Women's Jacket Size 12 Blue"
               className="w-full px-4 py-4 rounded-xl border border-stone-200 focus:ring-2 focus:ring-brand-green focus:border-brand-green outline-none transition-all text-stone-800 placeholder:text-stone-300"
               required
+              list="product-suggestions"
             />
+            <datalist id="product-suggestions">
+              {SUGGESTIONS.map((item) => (
+                <option key={item} value={item} />
+              ))}
+            </datalist>
           </div>
 
           <div className="space-y-3">
