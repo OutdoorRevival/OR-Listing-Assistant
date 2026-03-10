@@ -1,64 +1,20 @@
-# Outdoor Revival Listing Assistant
+<div align="center">
+<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+</div>
 
-AI-powered tool to help users create perfect listings for outdoor clothing and gear, with formatted titles, categories, and detailed descriptions.
+# Run and deploy your AI Studio app
 
-## Features
+This contains everything you need to run your app locally.
 
-- **AI-Powered Descriptions**: Generate professional, SEO-friendly descriptions for your outdoor gear.
-- **Automatic Categorization**: Smart suggestions for categories and attributes.
-- **Formatted Titles**: Create catchy and informative titles that stand out.
-- **Responsive Design**: Works perfectly on desktop and mobile devices.
+View your app in AI Studio: https://ai.studio/apps/fefc0fb0-acdd-4bd0-a8c9-79705270f212
 
-## Tech Stack
+## Run Locally
 
-- **Frontend**: React, TypeScript, Tailwind CSS
-- **AI**: Google Gemini API
-- **Icons**: Lucide React
-- **Animations**: Motion (Framer Motion)
+**Prerequisites:**  Node.js
 
-## Getting Started
 
-### Prerequisites
-
-- Node.js (v18 or higher)
-- npm or yarn
-- A Gemini API Key (get one at [aistudio.google.com](https://aistudio.google.com/))
-
-### Installation
-
-1. Clone the repository:
-   ```bash
-   git clone <repository-url>
-   cd outdoor-revival-listing-assistant
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Set up environment variables:
-   Create a `.env` file in the root directory and add your Gemini API key:
-   ```env
-   GEMINI_API_KEY=your_api_key_here
-   ```
-
-4. Start the development server:
-   ```bash
-   npm run dev
-   ```
-
-## Deployment
-
-### Build
-
-To create a production build:
-```bash
-npm run build
-```
-
-The output will be in the `dist` directory.
-
-## License
-
-MIT
+1. Install dependencies:
+   `npm install`
+2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+3. Run the app:
+   `npm run dev`

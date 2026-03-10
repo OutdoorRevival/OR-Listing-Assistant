@@ -1,8 +1,7 @@
 {
-  "name": "outdoor-revival-listing-assistant",
+  "name": "react-example",
   "private": true,
-  "version": "1.0.0",
-  "description": "AI-powered tool to help users create perfect listings for outdoor clothing and gear.",
+  "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite --port=3000 --host=0.0.0.0",
