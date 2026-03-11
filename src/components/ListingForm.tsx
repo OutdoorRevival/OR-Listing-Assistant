@@ -231,7 +231,7 @@ export default function ListingForm() {
               {/* Description Card */}
               <div className="bg-white rounded-3xl border border-stone-100 p-8 space-y-4 relative group">
                 <div className="flex justify-between items-start">
-                  <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">Detailed Description</label>
+                  <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">Description Suggestion</label>
                   <button 
                     onClick={() => copyToClipboard(suggestion.description, 'description')}
                     className="p-2 hover:bg-stone-50 rounded-lg text-stone-400 hover:text-brand-green transition-colors"
