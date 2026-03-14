@@ -102,7 +102,7 @@ export default function ListingForm() {
               <div className="h-1 w-24 bg-brand-orange mx-auto rounded-full" />
             </div>
             <p className="text-stone-500 max-w-2xl mx-auto text-sm leading-relaxed font-medium">
-              Let our AI-powered listing assistant do the work for you: enter a product name or upload a photo to get suggested details like Title, Description, Category, and Price Range. 
+              Our AI-powered assistant helps you create listing content for your pre-owned outdoor gear: enter a product name or upload a photo to generate suggested details like Title, Description, Category, and Price Range. 
               Use its recommendations as a guide to{' '}
               <a 
                 href="https://outdoorrevival.co.uk/l/draft/00000000-0000-0000-0000-000000000000/new/details" 
