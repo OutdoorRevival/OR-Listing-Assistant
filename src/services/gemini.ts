@@ -1,4 +1,4 @@
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenAI, Type, ThinkingLevel } from "@google/genai";
 
 const getApiKey = () => {
   // Vite's define plugin replaces these strings at build time
@@ -36,6 +36,35 @@ const SUB_CATEGORIES: Record<string, string[]> = {
   "Vanlife": ["Storage solutions", "Insulation", "Carpets, Mats & Protection", "Toppers & Bedding", "Bike racks, Roofbars & Accessories"]
 };
 
+export async function recognizeProductFromImage(base64Image: string, mimeType: string): Promise<string> {
+  if (!apiKey) {
+    throw new Error("GEMINI_API_KEY is missing. Please add it to your Vercel Environment Variables.");
+  }
+
+  const ai = new GoogleGenAI({ apiKey });
+  const response = await ai.models.generateContent({
+    model: "gemini-3-flash-preview",
+    contents: [
+      {
+        inlineData: {
+          data: base64Image,
+          mimeType: mimeType,
+        },
+      },
+      {
+        text: "Examine this image carefully. Identify the outdoor gear item shown. Provide the most accurate product name possible, including brand, model, and gender. ONLY return the product name and gender (e.g., 'Rab Microlight Alpine Jacket - Men's'). DO NOT provide any explanations, reasoning, or additional text.",
+      },
+    ],
+    config: {
+      tools: [{ googleSearch: {} }],
+      thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+      systemInstruction: "You are a world-class outdoor gear expert. Your goal is to provide highly accurate product identifications (Brand, Model, Gender) from photos. You MUST return ONLY the identification string and NOTHING else. No explanations, no conversation.",
+    },
+  });
+
+  return response.text?.trim() || "";
+}
+
 export async function generateListing(productName: string, condition: string): Promise<ListingSuggestion> {
   if (!apiKey) {
     throw new Error("GEMINI_API_KEY is missing. Please add it to your Vercel Environment Variables.");
@@ -51,6 +80,7 @@ export async function generateListing(productName: string, condition: string): P
     Condition: ${condition}`,
     config: {
       tools: [{ googleSearch: {} }],
+      thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
       systemInstruction: `You are an expert outdoor gear specialist for Outdoor Revival. 
       Your task is to help users list their items for sale by providing accurate, high-quality suggestions.
       
@@ -62,20 +92,10 @@ export async function generateListing(productName: string, condition: string): P
       Rules:
       1. Title format: Brand - Gender - Product Model - Size (UK)
       2. Category: Suggest a hierarchical category path (e.g., "Men's > Jackets & Outerwear > Down Jackets"). 
-         - The top-level category MUST be one of: ${CATEGORIES.join(", ")}.
-         - The second-level category SHOULD be one of the following based on the top-level:
-           ${Object.entries(SUB_CATEGORIES).map(([cat, subs]) => `${cat}: ${subs.join(", ")}`).join("\n           ")}
-         - You can add a third level for more specificity (e.g., "Men's > Jackets & Outerwear > Down Jackets").
       3. Description: Generate a professional and accurate description. 
-         - State the condition exactly as provided: "${condition}". Do not embellish or assume details about the condition beyond this label.
-         - MANDATORY: Include technical specifications such as weight (in grams/kg), materials (e.g., GORE-TEX, Pertex), insulation type (e.g., 800-fill down), and key features (e.g., helmet-compatible hood, YKK zips).
-         - Use the manufacturer's official product copy as a reference for tone and accuracy.
-         - Keep it concise but informative.
+         - State the condition exactly as provided: "${condition}".
+         - MANDATORY: Include technical specifications such as weight, materials, and key features.
       4. Suggested Price: Estimate a fair resale price in GBP (£). 
-         - Consider the estimated RRP for the item.
-         - Adjust based on the condition (${condition}).
-         - Factor in typical resale value for outdoor gear on platforms like eBay, Depop, or specialized gear swaps.
-         - Return a single value or a small range (e.g., "£85" or "£80 - £90").
       5. If size or gender is missing from the input, make a best guess based on the product name or use "N/A" or "Unisex".`,
       responseMimeType: "application/json",
       responseSchema: {

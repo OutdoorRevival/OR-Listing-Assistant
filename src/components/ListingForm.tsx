@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Sparkles, Copy, Check, RefreshCw, Mountain, Info } from 'lucide-react';
-import { generateListing, ListingSuggestion } from '../services/gemini';
+import { Sparkles, Copy, Check, RefreshCw, Mountain, Info, ExternalLink, Camera, Loader2 } from 'lucide-react';
+import { generateListing, ListingSuggestion, recognizeProductFromImage } from '../services/gemini';
 
 type Condition = 'Fair' | 'Good' | 'Like New';
 
@@ -12,6 +12,43 @@ export default function ListingForm() {
   const [error, setError] = useState<string | null>(null);
   const [suggestion, setSuggestion] = useState<ListingSuggestion | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
+  const [recognizing, setRecognizing] = useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setRecognizing(true);
+    setError(null);
+
+    try {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64String = (reader.result as string).split(',')[1];
+        const mimeType = file.type;
+        
+        try {
+          const identifiedName = await recognizeProductFromImage(base64String, mimeType);
+          if (identifiedName) {
+            setProductName(identifiedName);
+          } else {
+            setError("Could not identify the item. Please try entering the name manually.");
+          }
+        } catch (err) {
+          console.error('Error recognizing image:', err);
+          setError(err instanceof Error ? err.message : 'Failed to recognize image.');
+        } finally {
+          setRecognizing(false);
+        }
+      };
+      reader.readAsDataURL(file);
+    } catch (err) {
+      console.error('File reading error:', err);
+      setError('Failed to read image file.');
+      setRecognizing(false);
+    }
+  };
 
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,106 +74,142 @@ export default function ListingForm() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 md:p-12">
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="space-y-8"
-      >
-        <header className="text-center space-y-4">
-          <div className="inline-flex items-center justify-center mb-2">
-            <img 
-              src="https://sharetribe-assets.imgix.net/68f6a2f1-2d55-442f-8ff6-3d8850eb5021/raw/47/e1b42d122ec53116f7112f312d3a3e7674935c?auto=format&fit=clip&h=96&w=640&s=b66f6edfb24bf2df833ef6ed196f8dc4" 
-              alt="Outdoor Revival Logo" 
-              className="h-[72px] w-auto object-contain"
-              referrerPolicy="no-referrer"
-            />
-          </div>
-          <h1 className="text-4xl font-sans font-bold tracking-tight text-stone-900">
-            Listing Assistant
-          </h1>
-          <p className="text-stone-500 max-w-2xl mx-auto text-sm leading-relaxed">
-            Let our AI-powered listing assistant do the work for you: it suggests a Title, Description, Category, and Price Range. 
-            Use its recommendations as a guide to{' '}
-            <a 
-              href="https://outdoorrevival.co.uk/l/draft/00000000-0000-0000-0000-000000000000/new/details" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-brand-green font-semibold underline underline-offset-4 hover:text-stone-900 transition-colors"
+    <div className="min-h-screen bg-[#fcfcf9] selection:bg-brand-orange/30">
+      <div className="max-w-4xl mx-auto p-6 md:p-12">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="space-y-12"
+        >
+          <header className="text-center space-y-6">
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.5 }}
+              className="inline-flex items-center justify-center"
             >
-              create your own listing
-            </a>.
-          </p>
-        </header>
-
-        <form onSubmit={handleGenerate} className="bg-white rounded-3xl shadow-sm border border-stone-100 p-8 space-y-6">
-          <div className="space-y-3">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
-              <label className="text-sm font-bold uppercase tracking-wider text-stone-600">
-                Product Name & Details
-              </label>
-              <span className="text-xs text-stone-400 font-medium italic">
-                Include brand, model, gender, and size if known for better results.
-              </span>
+              <img 
+                src="https://sharetribe-assets.imgix.net/68f6a2f1-2d55-442f-8ff6-3d8850eb5021/raw/47/e1b42d122ec53116f7112f312d3a3e7674935c?auto=format&fit=clip&h=96&w=640&s=b66f6edfb24bf2df833ef6ed196f8dc4" 
+                alt="Outdoor Revival Logo" 
+                className="h-24 w-auto object-contain"
+                referrerPolicy="no-referrer"
+              />
+            </motion.div>
+            <div className="space-y-2">
+              <h1 className="text-5xl font-sans font-black tracking-tight text-stone-900 italic">
+                Listing <span className="text-brand-orange">Assistant</span>
+              </h1>
+              <div className="h-1 w-24 bg-brand-orange mx-auto rounded-full" />
             </div>
-            <input
-              type="text"
-              value={productName}
-              onChange={(e) => setProductName(e.target.value)}
-              placeholder="e.g. Rab Microlight Alpine Women's Jacket Size 12 Blue"
-              className="w-full px-4 py-4 rounded-xl border border-stone-200 focus:ring-2 focus:ring-brand-green focus:border-brand-green outline-none transition-all text-stone-800 placeholder:text-stone-300"
-              required
-            />
-          </div>
+            <p className="text-stone-500 max-w-2xl mx-auto text-sm leading-relaxed font-medium">
+              Let our AI-powered listing assistant do the work for you: enter a product name or upload a photo to get suggested details like Title, Description, Category, and Price Range. 
+              Use its recommendations as a guide to{' '}
+              <a 
+                href="https://outdoorrevival.co.uk/l/draft/00000000-0000-0000-0000-000000000000/new/details" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-brand-orange font-semibold underline underline-offset-4 hover:text-stone-900 transition-colors"
+              >
+                create your own listing
+              </a>.
+            </p>
+          </header>
 
-          <div className="space-y-3">
-            <label className="text-sm font-bold uppercase tracking-wider text-stone-600">Condition</label>
-            <div className="flex gap-3">
-              {(['Fair', 'Good', 'Like New'] as Condition[]).map((c) => (
+          <form onSubmit={handleGenerate} className="bg-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-stone-100 p-10 space-y-8 relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-brand-orange to-brand-orange-dark" />
+            
+            <div className="space-y-4">
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-2">
+                <label className="text-xs font-bold tracking-wider text-stone-900">
+                  1. Identify Your Gear
+                </label>
+                <span className="text-[10px] text-stone-400 font-bold tracking-wider">
+                  Include brand, model, gender, and size if known for better results.
+                </span>
+              </div>
+              <div className="relative group">
+                <input
+                  type="text"
+                  value={productName}
+                  onChange={(e) => setProductName(e.target.value)}
+                  placeholder="e.g. Rab Microlight Alpine Women's Jacket Size 12 Blue"
+                  className="w-full pl-6 pr-44 py-5 rounded-2xl border-2 border-stone-50 bg-stone-50/50 focus:bg-white focus:ring-4 focus:ring-brand-orange/10 focus:border-brand-orange outline-none transition-all text-stone-800 placeholder:text-stone-300 font-medium text-lg"
+                  required
+                />
                 <button
-                  key={c}
                   type="button"
-                  onClick={() => setCondition(c)}
-                  className={`flex-1 py-3 rounded-xl text-sm font-semibold transition-all border ${
-                    condition === c
-                      ? 'bg-brand-green border-brand-green text-white shadow-md shadow-brand-green/10'
-                      : 'bg-white border-stone-200 text-stone-600 hover:border-brand-green/20 hover:bg-brand-green/5'
-                  }`}
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={recognizing}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-3 px-4 py-2.5 bg-white border border-stone-200 rounded-xl text-stone-600 hover:text-brand-orange hover:border-brand-orange/30 hover:shadow-lg hover:shadow-brand-orange/5 transition-all disabled:opacity-50 group/btn"
                 >
-                  {c}
+                  <div className="text-right hidden sm:block">
+                    <p className="text-[10px] font-black tracking-widest leading-none group-hover/btn:text-brand-orange transition-colors">Upload Photo</p>
+                  </div>
+                  {recognizing ? (
+                    <Loader2 className="animate-spin text-brand-orange" size={20} />
+                  ) : (
+                    <Camera size={20} className="group-hover/btn:scale-110 transition-transform" />
+                  )}
                 </button>
-              ))}
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleImageUpload}
+                  accept="image/*"
+                  className="hidden"
+                  capture="environment"
+                />
+              </div>
             </div>
-          </div>
 
-          <div className="flex gap-4">
-            <button
-              type="button"
-              onClick={() => {
-                setProductName('');
-                setSuggestion(null);
-                setError(null);
-              }}
-              className="px-8 py-4 bg-stone-100 text-stone-600 rounded-2xl font-semibold hover:bg-stone-200 transition-all active:scale-[0.98]"
-            >
-              Reset
-            </button>
-            <button
-              type="submit"
-              disabled={loading || !productName.trim()}
-              className="flex-1 py-4 bg-stone-900 text-white rounded-2xl font-semibold flex items-center justify-center gap-2 hover:bg-stone-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.98]"
-            >
-              {loading ? (
-                <RefreshCw className="animate-spin" size={20} />
-              ) : (
-                <>
-                  <Sparkles size={20} />
-                  Generate Listing
-                </>
-              )}
-            </button>
-          </div>
-        </form>
+            <div className="space-y-4">
+              <label className="text-xs font-bold tracking-wider text-stone-900">2. Select Condition</label>
+              <div className="flex gap-4">
+                {(['Fair', 'Good', 'Like New'] as Condition[]).map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setCondition(c)}
+                    className={`flex-1 py-4 rounded-2xl text-sm font-black tracking-widest transition-all border-2 ${
+                      condition === c
+                        ? 'bg-stone-900 border-stone-900 text-white shadow-xl shadow-stone-900/20 scale-[1.02]'
+                        : 'bg-white border-stone-100 text-stone-400 hover:border-stone-200 hover:text-stone-600'
+                    }`}
+                  >
+                    {c}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4 pt-4">
+              <button
+                type="button"
+                onClick={() => {
+                  setProductName('');
+                  setSuggestion(null);
+                  setError(null);
+                }}
+                className="px-10 py-5 bg-stone-50 text-stone-400 rounded-2xl font-bold tracking-widest text-xs hover:bg-stone-100 hover:text-stone-600 transition-all active:scale-[0.98]"
+              >
+                Reset
+              </button>
+              <button
+                type="submit"
+                disabled={loading || !productName.trim()}
+                className="flex-1 py-5 bg-brand-orange text-white rounded-2xl font-black tracking-widest flex items-center justify-center gap-3 hover:bg-brand-orange-dark disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.98] shadow-xl shadow-brand-orange/20"
+              >
+                {loading ? (
+                  <RefreshCw className="animate-spin" size={22} />
+                ) : (
+                  <>
+                    <Sparkles size={22} />
+                    Generate Listing
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
 
         <AnimatePresence mode="wait">
           {error && (
@@ -166,62 +239,62 @@ export default function ListingForm() {
               exit={{ opacity: 0, scale: 0.95 }}
               className="space-y-6"
             >
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {/* Title Card */}
-                <div className="md:col-span-2 bg-white rounded-3xl border border-stone-100 p-6 space-y-3 relative group">
+                <div className="md:col-span-2 bg-white rounded-[2rem] border border-stone-100 p-8 space-y-4 relative group shadow-sm hover:shadow-md transition-shadow">
                   <div className="flex justify-between items-start">
-                    <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">Suggested Title</label>
+                    <label className="text-xs font-bold tracking-wider text-stone-900">Suggested Title</label>
                     <button 
                       onClick={() => copyToClipboard(suggestion.title, 'title')}
-                      className="p-2 hover:bg-stone-50 rounded-lg text-stone-400 hover:text-brand-green transition-colors"
+                      className="p-2.5 hover:bg-stone-50 rounded-xl text-stone-300 hover:text-brand-orange transition-colors"
                     >
-                      {copied === 'title' ? <Check size={16} /> : <Copy size={16} />}
+                      {copied === 'title' ? <Check size={18} /> : <Copy size={18} />}
                     </button>
                   </div>
-                  <p className="text-xl font-medium text-stone-900 leading-tight">
+                  <p className="text-2xl font-sans font-bold text-stone-900 leading-tight">
                     {suggestion.title}
                   </p>
                 </div>
 
                 {/* Price Card */}
-                <div className="bg-brand-green/5 rounded-3xl border border-brand-green/10 p-6 space-y-3 relative group">
+                <div className="bg-brand-orange/5 rounded-[2rem] border border-brand-orange/10 p-8 space-y-4 relative group shadow-sm hover:shadow-md transition-shadow">
                   <div className="flex justify-between items-start">
-                    <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-green">Suggested Price</label>
+                    <label className="text-xs font-bold tracking-wider text-stone-900">Suggested Price</label>
                     <button 
                       onClick={() => copyToClipboard(suggestion.suggestedPrice, 'price')}
-                      className="p-2 hover:bg-white/50 rounded-lg text-brand-green/40 hover:text-brand-green transition-colors"
+                      className="p-2.5 hover:bg-white/50 rounded-xl text-brand-orange/40 hover:text-brand-orange transition-colors"
                     >
-                      {copied === 'price' ? <Check size={16} /> : <Copy size={16} />}
+                      {copied === 'price' ? <Check size={18} /> : <Copy size={18} />}
                     </button>
                   </div>
-                  <p className="text-3xl font-sans font-bold text-brand-green leading-tight">
+                  <p className="text-4xl font-sans font-black text-brand-orange leading-tight">
                     {suggestion.suggestedPrice}
                   </p>
-                  <p className="text-[9px] text-brand-green/70 font-medium">
-                    Based on RRP, condition & market trends
+                  <p className="text-[10px] text-brand-orange/60 font-bold tracking-wider">
+                    Market Value Estimate
                   </p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 gap-6">
+              <div className="grid grid-cols-1 gap-8">
                 {/* Category Card */}
-                <div className="bg-white rounded-3xl border border-stone-100 p-6 space-y-3 relative group">
+                <div className="bg-white rounded-[2rem] border border-stone-100 p-8 space-y-4 relative group shadow-sm hover:shadow-md transition-shadow">
                   <div className="flex justify-between items-start">
-                    <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">Suggested Category Path</label>
+                    <label className="text-xs font-bold tracking-wider text-stone-900">Suggested Category Path</label>
                     <button 
                       onClick={() => copyToClipboard(suggestion.category, 'category')}
-                      className="p-2 hover:bg-stone-50 rounded-lg text-stone-400 hover:text-brand-green transition-colors"
+                      className="p-2.5 hover:bg-stone-50 rounded-xl text-stone-300 hover:text-brand-orange transition-colors"
                     >
-                      {copied === 'category' ? <Check size={16} /> : <Copy size={16} />}
+                      {copied === 'category' ? <Check size={18} /> : <Copy size={18} />}
                     </button>
                   </div>
-                  <div className="flex flex-wrap gap-2 items-center">
+                  <div className="flex flex-wrap gap-3 items-center">
                     {suggestion.category.split(' > ').map((part, i, arr) => (
                       <React.Fragment key={i}>
-                        <span className="px-3 py-1 bg-stone-50 text-stone-700 rounded-full text-sm font-medium border border-stone-100">
+                        <span className="px-5 py-2 bg-stone-50 text-stone-700 rounded-2xl text-sm font-bold border border-stone-100 tracking-wider">
                           {part}
                         </span>
-                        {i < arr.length - 1 && <span className="text-stone-300 text-xs">/</span>}
+                        {i < arr.length - 1 && <span className="text-stone-200 font-black">/</span>}
                       </React.Fragment>
                     ))}
                   </div>
@@ -229,26 +302,28 @@ export default function ListingForm() {
               </div>
 
               {/* Description Card */}
-              <div className="bg-white rounded-3xl border border-stone-100 p-8 space-y-4 relative group">
+              <div className="bg-white rounded-[2rem] border border-stone-100 p-10 space-y-6 relative group shadow-sm hover:shadow-md transition-shadow">
                 <div className="flex justify-between items-start">
-                  <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">Description Suggestion</label>
+                  <label className="text-xs font-bold tracking-wider text-stone-900">Description Suggestion</label>
                   <button 
                     onClick={() => copyToClipboard(suggestion.description, 'description')}
-                    className="p-2 hover:bg-stone-50 rounded-lg text-stone-400 hover:text-brand-green transition-colors"
+                    className="p-2.5 hover:bg-stone-50 rounded-xl text-stone-300 hover:text-brand-orange transition-colors"
                   >
-                    {copied === 'description' ? <Check size={16} /> : <Copy size={16} />}
+                    {copied === 'description' ? <Check size={18} /> : <Copy size={18} />}
                   </button>
                 </div>
                 <div className="prose prose-stone max-w-none">
-                  <p className="text-stone-700 leading-relaxed whitespace-pre-wrap">
+                  <p className="text-stone-700 leading-loose whitespace-pre-wrap font-medium text-lg">
                     {suggestion.description}
                   </p>
                 </div>
               </div>
+
             </motion.div>
           )}
         </AnimatePresence>
       </motion.div>
     </div>
+  </div>
   );
 }
