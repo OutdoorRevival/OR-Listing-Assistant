@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Sparkles, Copy, Check, RefreshCw, Mountain, Info, ExternalLink, Camera, Loader2 } from 'lucide-react';
 import { generateListing, ListingSuggestion, recognizeProductFromImage } from '../services/gemini';
 
-type Condition = 'Fair' | 'Good' | 'Like New';
+type Condition = 'Fair' | 'Good' | 'Like New' | 'Brand New';
 
 export default function ListingForm() {
   const [productName, setProductName] = useState('');
@@ -127,29 +127,36 @@ export default function ListingForm() {
                   Include brand, model, gender, and size if known for better results.
                 </span>
               </div>
-              <div className="relative group">
-                <input
-                  type="text"
-                  value={productName}
-                  onChange={(e) => setProductName(e.target.value)}
-                  placeholder="e.g. Rab Microlight Alpine Women's Jacket Size 12 Blue"
-                  className="w-full pl-6 pr-44 py-5 rounded-2xl border-2 border-stone-50 bg-stone-50/50 focus:bg-white focus:ring-4 focus:ring-brand-orange/10 focus:border-brand-orange outline-none transition-all text-stone-800 placeholder:text-stone-300 font-medium text-lg"
-                  required
-                />
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="relative flex-1">
+                  <textarea
+                    value={productName}
+                    onChange={(e) => setProductName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        e.currentTarget.form?.requestSubmit();
+                      }
+                    }}
+                    placeholder="e.g. Rab Microlight Alpine Women's Jacket Size 12 Blue"
+                    className="w-full px-6 py-6 sm:py-5 rounded-2xl border-2 border-stone-50 bg-stone-50/50 focus:bg-white focus:ring-4 focus:ring-brand-orange/10 focus:border-brand-orange outline-none transition-all text-stone-800 placeholder:text-stone-300 font-medium text-lg resize-none min-h-[120px] sm:min-h-[64px]"
+                    required
+                  />
+                </div>
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={recognizing}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-3 px-4 py-2.5 bg-white border border-stone-200 rounded-xl text-stone-600 hover:text-brand-orange hover:border-brand-orange/30 hover:shadow-lg hover:shadow-brand-orange/5 transition-all disabled:opacity-50 group/btn"
+                  className="flex flex-col items-center justify-center gap-2 px-4 py-5 sm:py-3 bg-white border-2 border-stone-100 rounded-2xl text-stone-600 hover:text-brand-orange hover:border-brand-orange/30 hover:shadow-lg hover:shadow-brand-orange/5 transition-all disabled:opacity-50 group/btn sm:w-32 shrink-0"
                 >
-                  <div className="text-right hidden sm:block">
-                    <p className="text-[10px] font-black tracking-widest leading-none group-hover/btn:text-brand-orange transition-colors">Upload Photo</p>
-                  </div>
                   {recognizing ? (
                     <Loader2 className="animate-spin text-brand-orange" size={20} />
                   ) : (
                     <Camera size={20} className="group-hover/btn:scale-110 transition-transform" />
                   )}
+                  <span className="text-[10px] font-bold tracking-widest uppercase text-center leading-tight">
+                    or upload<br />photo
+                  </span>
                 </button>
                 <input
                   type="file"
@@ -164,13 +171,13 @@ export default function ListingForm() {
 
             <div className="space-y-4">
               <label className="text-xs font-bold tracking-wider text-stone-900">2. Select Condition</label>
-              <div className="flex gap-4">
-                {(['Fair', 'Good', 'Like New'] as Condition[]).map((c) => (
+              <div className="grid grid-cols-2 sm:flex gap-3 sm:gap-4">
+                {(['Fair', 'Good', 'Like New', 'Brand New'] as Condition[]).map((c) => (
                   <button
                     key={c}
                     type="button"
                     onClick={() => setCondition(c)}
-                    className={`flex-1 py-4 rounded-2xl text-sm font-black tracking-widest transition-all border-2 ${
+                    className={`flex-1 py-4 rounded-2xl text-sm font-bold tracking-widest transition-all border-2 ${
                       condition === c
                         ? 'bg-stone-900 border-stone-900 text-white shadow-xl shadow-stone-900/20 scale-[1.02]'
                         : 'bg-white border-stone-100 text-stone-400 hover:border-stone-200 hover:text-stone-600'
@@ -184,20 +191,9 @@ export default function ListingForm() {
 
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
               <button
-                type="button"
-                onClick={() => {
-                  setProductName('');
-                  setSuggestion(null);
-                  setError(null);
-                }}
-                className="px-10 py-5 bg-stone-50 text-stone-400 rounded-2xl font-bold tracking-widest text-xs hover:bg-stone-100 hover:text-stone-600 transition-all active:scale-[0.98]"
-              >
-                Reset
-              </button>
-              <button
                 type="submit"
                 disabled={loading || !productName.trim()}
-                className="flex-1 py-5 bg-brand-orange text-white rounded-2xl font-black tracking-widest flex items-center justify-center gap-3 hover:bg-brand-orange-dark disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.98] shadow-xl shadow-brand-orange/20"
+                className="flex-1 py-5 bg-brand-orange text-white rounded-2xl font-bold tracking-widest flex items-center justify-center gap-3 hover:bg-brand-orange-dark disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.98] shadow-xl shadow-brand-orange/20"
               >
                 {loading ? (
                   <RefreshCw className="animate-spin" size={22} />
@@ -207,6 +203,17 @@ export default function ListingForm() {
                     Generate Listing
                   </>
                 )}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setProductName('');
+                  setSuggestion(null);
+                  setError(null);
+                }}
+                className="px-10 py-5 bg-stone-50 text-stone-400 rounded-2xl font-bold tracking-widest text-xs hover:bg-stone-100 hover:text-stone-600 transition-all active:scale-[0.98]"
+              >
+                Reset
               </button>
             </div>
           </form>
