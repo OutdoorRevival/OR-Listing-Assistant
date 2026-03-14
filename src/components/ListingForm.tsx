@@ -91,7 +91,7 @@ export default function ListingForm() {
               <img 
                 src="https://sharetribe-assets.imgix.net/68f6a2f1-2d55-442f-8ff6-3d8850eb5021/raw/47/e1b42d122ec53116f7112f312d3a3e7674935c?auto=format&fit=clip&h=96&w=640&s=b66f6edfb24bf2df833ef6ed196f8dc4" 
                 alt="Outdoor Revival Logo" 
-                className="h-24 w-auto object-contain"
+                className="h-20 w-auto object-contain"
                 referrerPolicy="no-referrer"
               />
             </motion.div>
@@ -139,7 +139,7 @@ export default function ListingForm() {
                       }
                     }}
                     placeholder="e.g. Rab Microlight Alpine Women's Jacket Size 12 Blue"
-                    className="w-full px-6 py-6 sm:py-5 rounded-2xl border-2 border-stone-50 bg-stone-50/50 focus:bg-white focus:ring-4 focus:ring-brand-orange/10 focus:border-brand-orange outline-none transition-all text-stone-800 placeholder:text-stone-300 font-medium text-lg resize-none min-h-[120px] sm:min-h-[64px]"
+                    className="w-full px-6 py-6 sm:py-5 rounded-2xl border-2 border-stone-100 bg-stone-100/50 focus:bg-white focus:ring-4 focus:ring-brand-orange/10 focus:border-brand-orange outline-none transition-all text-stone-800 placeholder:text-stone-400 font-medium text-lg resize-none min-h-[120px] sm:min-h-[64px] hover:border-stone-200"
                     required
                   />
                 </div>
@@ -193,14 +193,14 @@ export default function ListingForm() {
               <button
                 type="submit"
                 disabled={loading || !productName.trim()}
-                className="flex-1 py-5 bg-brand-orange text-white rounded-2xl font-bold tracking-widest flex items-center justify-center gap-3 hover:bg-brand-orange-dark disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.98] shadow-xl shadow-brand-orange/20"
+                className="w-full sm:flex-1 py-8 px-6 bg-brand-orange text-white rounded-2xl font-bold tracking-widest flex flex-col items-center justify-center text-center leading-tight hover:bg-brand-orange-dark disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.98] shadow-xl shadow-brand-orange/20"
               >
                 {loading ? (
-                  <RefreshCw className="animate-spin" size={22} />
+                  'Getting Suggestions...'
                 ) : (
                   <>
-                    <Sparkles size={22} />
-                    Get Listing Suggestions
+                    <span>GET LISTING</span>
+                    <span>SUGGESTIONS</span>
                   </>
                 )}
               </button>
