@@ -200,7 +200,7 @@ export default function ListingForm() {
                 ) : (
                   <>
                     <Sparkles size={22} />
-                    Generate Listing
+                    Get Listing Suggestions
                   </>
                 )}
               </button>
@@ -320,10 +320,28 @@ export default function ListingForm() {
                   </button>
                 </div>
                 <div className="prose prose-stone max-w-none">
-                  <p className="text-stone-700 leading-loose whitespace-pre-wrap font-medium text-lg">
+                  <p className="text-stone-700 leading-loose whitespace-pre-wrap font-medium text-base">
                     {suggestion.description}
                   </p>
                 </div>
+              </div>
+
+              <div className="pt-12 text-center space-y-8">
+                <div className="space-y-2">
+                  <p className="text-stone-900 font-bold text-2xl italic">Ready to sell?</p>
+                  <p className="text-stone-500 text-sm font-medium">
+                    You can now copy and paste the suggested content directly into your listing.
+                  </p>
+                </div>
+                <a 
+                  href="https://outdoorrevival.co.uk/l/draft/00000000-0000-0000-0000-000000000000/new/details"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-3 px-12 py-6 bg-brand-orange text-white rounded-2xl font-bold tracking-widest hover:bg-brand-orange-dark transition-all active:scale-[0.98] shadow-2xl shadow-brand-orange/30 group"
+                >
+                  Create Listing
+                  <ExternalLink size={20} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                </a>
               </div>
 
             </motion.div>
