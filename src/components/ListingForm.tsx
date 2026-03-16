@@ -193,16 +193,9 @@ export default function ListingForm() {
               <button
                 type="submit"
                 disabled={loading || !productName.trim()}
-                className="w-full sm:flex-1 py-8 px-6 bg-brand-orange text-white rounded-2xl font-bold tracking-widest flex flex-col items-center justify-center text-center leading-tight hover:bg-brand-orange-dark disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.98] shadow-xl shadow-brand-orange/20"
+                className="w-full sm:flex-1 py-8 px-6 bg-brand-orange text-white rounded-2xl font-bold tracking-wider sm:tracking-widest flex items-center justify-center text-center hover:bg-brand-orange-dark disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.98] shadow-xl shadow-brand-orange/20 text-sm sm:text-base"
               >
-                {loading ? (
-                  'Getting Suggestions...'
-                ) : (
-                  <>
-                    <span>GET LISTING</span>
-                    <span>SUGGESTIONS</span>
-                  </>
-                )}
+                {loading ? 'Getting Suggestions...' : 'GET LISTING SUGGESTIONS'}
               </button>
               <button
                 type="button"
