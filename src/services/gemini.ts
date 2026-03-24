@@ -93,9 +93,9 @@ export async function generateListing(productName: string, condition: string): P
       1. Title format: Brand - Gender - Product Model - Size (UK)
       2. Category: Suggest a hierarchical category path (e.g., "Men's > Jackets & Outerwear > Down Jackets"). 
       3. Description: Generate a professional and accurate description. 
-         - State the condition exactly as provided: "${condition}".
+         - DO NOT include any information about the condition of the item in the description.
          - MANDATORY: Include technical specifications such as weight, materials, and key features.
-      4. Suggested Price: Estimate a fair resale price in GBP (£). 
+      4. Suggested Price: Estimate a fair resale price in GBP (£) based on the provided condition. 
       5. If size or gender is missing from the input, make a best guess based on the product name or use "N/A" or "Unisex".`,
       responseMimeType: "application/json",
       responseSchema: {

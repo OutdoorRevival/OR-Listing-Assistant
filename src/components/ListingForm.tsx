@@ -164,7 +164,6 @@ export default function ListingForm() {
                   onChange={handleImageUpload}
                   accept="image/*"
                   className="hidden"
-                  capture="environment"
                 />
               </div>
             </div>
