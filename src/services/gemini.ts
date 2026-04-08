@@ -1,4 +1,4 @@
-import { GoogleGenAI, Type, ThinkingLevel } from "@google/genai";
+import { GoogleGenAI, Type } from "@google/genai";
 
 const getApiKey = () => {
   // Vite's define plugin replaces these strings at build time
@@ -42,8 +42,8 @@ export async function recognizeProductFromImage(base64Image: string, mimeType: s
   }
 
   const ai = new GoogleGenAI({ apiKey });
-  const response = await ai.models.generateContent({
-    model: "gemini-3-flash-preview",
+  const result = await ai.models.generateContent({
+    model: "gemini-2.0-flash",
     contents: [
       {
         inlineData: {
@@ -56,13 +56,11 @@ export async function recognizeProductFromImage(base64Image: string, mimeType: s
       },
     ],
     config: {
-      tools: [{ googleSearch: {} }],
-      thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
       systemInstruction: "You are a world-class outdoor gear expert. Your goal is to provide highly accurate product identifications (Brand, Model, Gender) from photos. You MUST return ONLY the identification string and NOTHING else. No explanations, no conversation.",
     },
   });
 
-  return response.text?.trim() || "";
+  return result.text?.trim() || "";
 }
 
 export async function generateListing(productName: string, condition: string): Promise<ListingSuggestion> {
@@ -71,16 +69,14 @@ export async function generateListing(productName: string, condition: string): P
   }
 
   const ai = new GoogleGenAI({ apiKey });
-  const response = await ai.models.generateContent({
-    model: "gemini-3-flash-preview",
+  const result = await ai.models.generateContent({
+    model: "gemini-2.0-flash",
     contents: `Generate a listing for an outdoor gear item. 
     Search for the latest model of this product on the manufacturer's official website to ensure the technical specifications and description are accurate.
     
     Product Name: ${productName}
     Condition: ${condition}`,
     config: {
-      tools: [{ googleSearch: {} }],
-      thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
       systemInstruction: `You are an expert outdoor gear specialist for Outdoor Revival. 
       Your task is to help users list their items for sale by providing accurate, high-quality suggestions.
       
@@ -111,5 +107,5 @@ export async function generateListing(productName: string, condition: string): P
     },
   });
 
-  return JSON.parse(response.text || "{}");
+  return JSON.parse(result.text || "{}");
 }

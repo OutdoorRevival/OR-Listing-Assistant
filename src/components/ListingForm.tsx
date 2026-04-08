@@ -288,12 +288,14 @@ export default function ListingForm() {
                     </button>
                   </div>
                   <div className="flex flex-wrap gap-3 items-center">
-                    {suggestion.category.split(' > ').map((part, i, arr) => (
+                    {(suggestion.category || '').split(' > ').map((part, i, arr) => (
                       <React.Fragment key={i}>
-                        <span className="px-5 py-2 bg-stone-50 text-stone-700 rounded-2xl text-sm font-bold border border-stone-100 tracking-wider">
-                          {part}
-                        </span>
-                        {i < arr.length - 1 && <span className="text-stone-200 font-black">/</span>}
+                        {part && (
+                          <span className="px-5 py-2 bg-stone-50 text-stone-700 rounded-2xl text-sm font-bold border border-stone-100 tracking-wider">
+                            {part}
+                          </span>
+                        )}
+                        {i < arr.length - 1 && part && <span className="text-stone-200 font-black">/</span>}
                       </React.Fragment>
                     ))}
                   </div>
