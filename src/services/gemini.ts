@@ -43,7 +43,7 @@ export async function recognizeProductFromImage(base64Image: string, mimeType: s
 
   const ai = new GoogleGenAI({ apiKey });
   const result = await ai.models.generateContent({
-    model: "gemini-2.0-flash",
+    model: "gemini-3-flash-preview",
     contents: [
       {
         inlineData: {
@@ -70,7 +70,7 @@ export async function generateListing(productName: string, condition: string): P
 
   const ai = new GoogleGenAI({ apiKey });
   const result = await ai.models.generateContent({
-    model: "gemini-2.0-flash",
+    model: "gemini-3-flash-preview",
     contents: `Generate a listing for an outdoor gear item. 
     Search for the latest model of this product on the manufacturer's official website to ensure the technical specifications and description are accurate.
     
