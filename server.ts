@@ -1,5 +1,6 @@
 console.log("SERVER.TS STARTING...");
 import express from "express";
+import path from "path";
 import { createServer as createViteServer } from "vite";
 
 async function startServer() {
@@ -16,9 +17,10 @@ async function startServer() {
     });
     app.use(vite.middlewares);
   } else {
-    app.use(express.static("dist"));
-    app.get("*", (req, res) => {
-      res.sendFile("dist/index.html", { root: "." });
+    const distPath = path.join(process.cwd(), 'dist');
+    app.use(express.static(distPath));
+    app.get('*', (req, res) => {
+      res.sendFile(path.join(distPath, 'index.html'));
     });
   }
 
