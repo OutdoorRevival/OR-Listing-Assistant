@@ -1,19 +1,5 @@
 import { GoogleGenAI, Type } from "@google/genai";
 
-const getApiKey = () => {
-  // Vite's define plugin replaces these strings at build time
-  const envKey = process.env.GEMINI_API_KEY;
-  const viteKey = import.meta.env.VITE_GEMINI_API_KEY;
-  
-  // Return the first one that is a non-empty string and not the literal "undefined"
-  if (envKey && envKey !== 'undefined') return envKey;
-  if (viteKey && viteKey !== 'undefined') return viteKey;
-  
-  return '';
-};
-
-const apiKey = getApiKey();
-
 export interface ListingSuggestion {
   title: string;
   category: string;
@@ -21,27 +7,16 @@ export interface ListingSuggestion {
   suggestedPrice: string;
 }
 
-const CATEGORIES = [
-  "Men's", "Women's", "Kids", "Camping", "Backpacks", "Equipment", "Electronics", "Vanlife"
-];
-
-const SUB_CATEGORIES: Record<string, string[]> = {
-  "Men's": ["Jackets & Outerwear", "Tops", "Bottoms", "Accessories", "Footwear"],
-  "Women's": ["Jackets & Outerwear", "Tops", "Bottoms", "Accessories", "Footwear"],
-  "Kids": ["Jackets & Outerwear", "Tops", "Bottoms", "Accessories", "Footwear"],
-  "Camping": ["Tents", "Sleeping", "Camp kitchen", "Camp furniture", "Camp accessories"],
-  "Backpacks": ["Backpacks up to 20L - Daypack", "Backpacks 21-40L - Multi-day", "Backpacks 41-60L - Camping", "Backpacks 61L Plus - Expedition", "Holdalls", "Ultralight / Running"],
-  "Equipment": ["Trekking poles", "Navigation & maps", "Health & Safety", "Water bottles, flasks & filters", "Dog equipment"],
-  "Electronics": ["GPS & Watches", "Lighting", "Headphones", "Cameras & Drones"],
-  "Vanlife": ["Storage solutions", "Insulation", "Carpets, Mats & Protection", "Toppers & Bedding", "Bike racks, Roofbars & Accessories"]
+const getAi = () => {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey || apiKey === 'undefined' || apiKey === 'null') {
+    throw new Error("GEMINI_API_KEY is not set. Please add it to your project Settings > Secrets.");
+  }
+  return new GoogleGenAI({ apiKey: apiKey.trim() });
 };
 
 export async function recognizeProductFromImage(base64Image: string, mimeType: string): Promise<string> {
-  if (!apiKey) {
-    throw new Error("GEMINI_API_KEY is missing. Please add it to your Vercel Environment Variables.");
-  }
-
-  const ai = new GoogleGenAI({ apiKey });
+  const ai = getAi();
   const result = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
     contents: [
@@ -64,11 +39,7 @@ export async function recognizeProductFromImage(base64Image: string, mimeType: s
 }
 
 export async function generateListing(productName: string, condition: string): Promise<ListingSuggestion> {
-  if (!apiKey) {
-    throw new Error("GEMINI_API_KEY is missing. Please add it to your Vercel Environment Variables.");
-  }
-
-  const ai = new GoogleGenAI({ apiKey });
+  const ai = getAi();
   const result = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
     contents: `Generate a listing for an outdoor gear item. 
