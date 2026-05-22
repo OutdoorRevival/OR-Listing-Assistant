@@ -15,7 +15,7 @@ app.use(express.urlencoded({ limit: "20mb", extended: true }));
 let aiInstance: GoogleGenAI | null = null;
 
 function getGeminiClient(): GoogleGenAI {
-  const apiKey = process.env.GEMINI_API_KEY || "AIzaSyDG0QSZvvyIk8xnHF_Z85STvLpq3LiGouY";
+  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     throw new Error("GEMINI_API_KEY environment variable is missing.");
   }
