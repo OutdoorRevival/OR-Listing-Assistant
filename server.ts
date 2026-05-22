@@ -15,7 +15,7 @@ app.use(express.urlencoded({ limit: "20mb", extended: true }));
 let aiInstance: GoogleGenAI | null = null;
 
 function getGeminiClient(): GoogleGenAI {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY || "AIzaSyDG0QSZvvyIk8xnHF_Z85STvLpq3LiGouY";
   if (!apiKey) {
     throw new Error("GEMINI_API_KEY environment variable is missing.");
   }
@@ -51,8 +51,10 @@ function getSharetribeSdk() {
   return sdkInstance;
 }
 
+const apiRouter = express.Router();
+
 // API route to recognize product from image
-app.post("/api/gemini/recognize", async (req, res) => {
+apiRouter.post("/gemini/recognize", async (req, res) => {
   const { base64Image, mimeType } = req.body;
 
   if (!base64Image || !mimeType) {
@@ -94,7 +96,7 @@ app.post("/api/gemini/recognize", async (req, res) => {
 });
 
 // API route to generate listing suggestion
-app.post("/api/gemini/generate", async (req, res) => {
+apiRouter.post("/gemini/generate", async (req, res) => {
   const { productName, condition } = req.body;
 
   if (!productName || !condition) {
@@ -164,7 +166,7 @@ app.post("/api/gemini/generate", async (req, res) => {
 });
 
 // API route to create a draft listing
-app.post("/api/sharetribe/create-draft", async (req, res) => {
+apiRouter.post("/sharetribe/create-draft", async (req, res) => {
   const { title, description, price, category } = req.body;
 
   try {
@@ -195,6 +197,9 @@ app.post("/api/sharetribe/create-draft", async (req, res) => {
     });
   }
 });
+
+app.use("/api", apiRouter);
+app.use("/", apiRouter);
 
 // Vite middleware or static asset hosting
 async function mountViteOrStatic() {
